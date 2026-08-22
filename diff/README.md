@@ -183,7 +183,7 @@ The project targets .NET 10 and is intended for Windows, Linux, and macOS. Files
 
 ## AUTHORS
 
-Inspired by GNU Diffutils and the historical `diff` utility.
+GNU `diff` was written by Paul Eggert, Mike Haertel, David Hayes, Richard Stallman, and Len Tower.
 
 Migrated to .Net by Timothy J. Bruce <uniblab@hotmail.com>.
 

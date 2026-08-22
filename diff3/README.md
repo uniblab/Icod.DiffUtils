@@ -87,7 +87,7 @@ The project targets .NET 10 and is intended for Windows, Linux, and macOS. Three
 
 ## AUTHORS
 
-Inspired by GNU Diffutils and the historical `diff3` utility.
+GNU `diff3` was written by Randy Smith.
 
 Migrated to .Net by Timothy J. Bruce <uniblab@hotmail.com>.
 

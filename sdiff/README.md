@@ -101,7 +101,7 @@ The project targets .NET 10 and is intended for Windows, Linux, and macOS. Side-
 
 ## AUTHORS
 
-Inspired by GNU Diffutils and the historical `sdiff` utility.
+GNU `sdiff` was written by Thomas Lord.
 
 Migrated to .Net by Timothy J. Bruce <uniblab@hotmail.com>.
 

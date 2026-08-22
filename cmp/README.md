@@ -63,7 +63,7 @@ The project targets .NET 10 and is intended for Windows, Linux, and macOS. Compa
 
 ## AUTHORS
 
-Inspired by GNU Diffutils and the historical `cmp` utility.
+GNU `cmp` was written by Torbjörn Granlund and David MacKenzie.
 
 Migrated to .Net by Timothy J. Bruce <uniblab@hotmail.com>.
 
