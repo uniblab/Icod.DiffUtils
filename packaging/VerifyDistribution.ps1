@@ -10,6 +10,16 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+$IsWindowsPlatform = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
+    [System.Runtime.InteropServices.OSPlatform]::Windows
+)
+$IsLinuxPlatform = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
+    [System.Runtime.InteropServices.OSPlatform]::Linux
+)
+$IsMacOSPlatform = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
+    [System.Runtime.InteropServices.OSPlatform]::OSX
+)
+
 function Get-ProjectProperty {
     param(
         [Parameter(Mandatory = $true)]
@@ -51,7 +61,7 @@ function Get-ToolShimPath {
         [string]$CommandName
     )
 
-    $fileName = if ($IsWindows) {
+    $fileName = if ($IsWindowsPlatform) {
         "$CommandName.exe"
     } else {
         $CommandName
@@ -98,13 +108,13 @@ function Get-CurrentRuntimeIdentifier {
         }
     }
 
-    if ($IsWindows) {
+    if ($IsWindowsPlatform) {
         return "win-$architecture"
     }
-    if ($IsLinux) {
+    if ($IsLinuxPlatform) {
         return "linux-$architecture"
     }
-    if ($IsMacOS) {
+    if ($IsMacOSPlatform) {
         return "osx-$architecture"
     }
 
@@ -352,7 +362,7 @@ try {
 
     foreach ($commandName in @('diffutil', 'cmp', 'diff', 'diff3', 'sdiff')) {
         $archiveCommandPath = Get-ToolShimPath -ToolPath $archiveExtractPath -CommandName $commandName
-        if (-not $IsWindows) {
+        if (-not $IsWindowsPlatform) {
             & chmod +x $archiveCommandPath
             if (0 -ne $LASTEXITCODE) {
                 throw "chmod failed for '$archiveCommandPath'."
