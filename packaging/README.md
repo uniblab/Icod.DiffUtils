@@ -1,18 +1,29 @@
-# Icod.DiffUtils packaging
+# Icod.DiffUtils distribution
 
-This project supplies the distribution layer for the mixed-mode Icod Diffutils
-release. It does not contain command behavior; the authoritative implementations
-remain in the `cmp`, `diff`, `diff3`, `sdiff`, and `diffutil` projects.
+This directory contains distribution verification for `Icod.DiffUtils`. Command
+behavior remains in the `cmp`, `diff`, `diff3`, `sdiff`, and `diffutil` projects.
 
-## 1. Conventional .NET tool: `diffutil`
+The supported distribution model intentionally has two forms:
 
-The ordinary SDK tool package is produced directly from the router project:
+1. one installable .NET tool package exposing `diffutil`; and
+2. the traditional standalone executables, which can be assembled into a ZIP
+   distribution separately.
+
+## .NET tool package
+
+The SDK tool package is produced directly from the router project:
 
 ```text
 dotnet pack diffutil/Icod.DiffUtils.DiffUtil.csproj -c Release -o artifacts
 ```
 
-The resulting `Icod.DiffUtils` package installs one command:
+The resulting package ID is:
+
+```text
+Icod.DiffUtils
+```
+
+It installs exactly one tool command:
 
 ```text
 diffutil
@@ -27,80 +38,73 @@ diffutil diff3 [args...]
 diffutil sdiff [args...]
 ```
 
-## 2. Multi-command .NET tool package
+The .NET tool package does not install separate `cmp`, `diff`, `diff3`, or
+`sdiff` shims. Current `dotnet tool` packaging supports one command per package,
+so the earlier experimental aggregate `Icod.DiffUtils.Executables` package has
+been removed.
 
-Pack the custom distribution project:
+## Traditional executable distribution
 
-```text
-dotnet pack packaging/Icod.DiffUtils.Packaging.csproj -c Release -o artifacts
-```
-
-The resulting `Icod.DiffUtils.Executables` package contains a custom
-`DotnetToolSettings.xml` with five command shims:
+The four historical command projects remain ordinary executable projects:
 
 ```text
-diffutil
-cmp
-diff
-diff3
-sdiff
+cmp/Icod.DiffUtils.Cmp.csproj
+diff/Icod.DiffUtils.Diff.csproj
+diff3/Icod.DiffUtils.Diff3.csproj
+sdiff/Icod.DiffUtils.SDiff.csproj
 ```
 
-The packaging project publishes all five command projects into one
-`tools/net10.0/any` payload before NuGet creates the package. The package is of
-type `DotnetTool` and can therefore be installed through the normal
-`dotnet tool install` workflow.
+They are deliberately marked `IsPackable=false`: they are executable artifacts,
+not separate NuGet packages.
 
-For a local smoke test after packing:
+For a traditional ZIP release, publish or collect the executable outputs for the
+desired runtime and assemble the archive manually. `diffutil` may be included in
+that ZIP as a fifth executable so users of the archive can choose either the
+traditional command names or the multi-command router.
+
+No repository target currently creates the ZIP automatically. This is
+intentional for the present release model.
+
+## Distribution verification
+
+Run:
 
 ```text
-dotnet tool install Icod.DiffUtils.Executables --tool-path ./.tools --add-source ./artifacts --version 1.0.0
-./.tools/diffutil --version
-./.tools/cmp --version
-./.tools/diff --version
-./.tools/diff3 --version
-./.tools/sdiff --version
+powershell packaging/VerifyDistribution.ps1
 ```
 
-On Windows the installed shims use the normal `.exe` suffix.
-
-## 3. RID-specific executable archive
-
-The `CreateArchive` target publishes framework-dependent apphosts for all five
-commands and places them in one ZIP archive. Supply the desired runtime
-identifier explicitly:
+or, with PowerShell 7:
 
 ```text
-dotnet msbuild packaging/Icod.DiffUtils.Packaging.csproj -t:CreateArchive -p:Configuration=Release -p:ArchiveRuntimeIdentifier=win-x64
-dotnet msbuild packaging/Icod.DiffUtils.Packaging.csproj -t:CreateArchive -p:Configuration=Release -p:ArchiveRuntimeIdentifier=linux-x64
-dotnet msbuild packaging/Icod.DiffUtils.Packaging.csproj -t:CreateArchive -p:Configuration=Release -p:ArchiveRuntimeIdentifier=osx-x64
+pwsh packaging/VerifyDistribution.ps1
 ```
 
-Archives are written beneath:
+The verifier:
 
-```text
-artifacts/Release/
-```
+- restores, builds, and tests the solution;
+- executes the built standalone `cmp`, `diff`, `diff3`, and `sdiff` apphosts;
+- packs `Icod.DiffUtils` from the `diffutil` project;
+- inspects the generated tool package and requires exactly one command named
+  `diffutil`;
+- verifies that the managed command assemblies are present in the package;
+- installs the package from an isolated local NuGet source; and
+- exercises `diffutil --version` and each routed command's `--version` path.
 
-By default the archive is framework-dependent, so the target host must have a
-compatible .NET 10 runtime. To request self-contained publishes instead, add:
-
-```text
--p:ArchiveSelfContained=true
-```
-
-The archive payload contains the traditional executables as well as `diffutil`.
-The command projects keep their existing standalone identities; the packaging
-project merely aggregates their publish outputs.
+The same verification is run by the repository's distribution-validation GitHub
+Actions workflow on Windows, Linux, and macOS.
 
 ## Versioning
 
-The initial packaging projects use assembly/product version `1.0.0` and NuGet
-package version `1.0.0`. Update both `Version` and `PackageVersion` in the
-router and packaging projects when preparing a release.
+The installable tool version is controlled by `Version` and `PackageVersion` in:
+
+```text
+diffutil/Icod.DiffUtils.DiffUtil.csproj
+```
+
+Update both values together when preparing a release.
 
 ## Licensing
 
-All executable distributions are GPL-3.0-or-later. The `diffutil` project carries
-the same GPLv3 `LICENSE` used by the standalone `cmp` executable, and the custom
-aggregate package includes the repository GPL license.
+`diffutil` and the standalone executable commands are GPL-3.0-or-later. The
+`diffutil` project carries the same GPLv3 license used by the traditional
+executable projects.

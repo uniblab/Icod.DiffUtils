@@ -2,7 +2,7 @@
 
 `Icod.DiffUtils` is a managed .NET implementation of GNU Diffutils 3.12,
 providing the familiar `cmp`, `diff`, `diff3`, and `sdiff` command-line tools in
-C#.
+C#, together with the `diffutil` multi-command .NET tool router.
 
 The project targets .NET 10 and C# 13 and is designed for Windows, Linux, and
 macOS, with best-effort support for BSD-family systems. Shared comparison and
@@ -21,6 +21,7 @@ host operating system's native Diffutils installation.
 | [`diff`](diff/README.md) | Compare files or directories line by line and emit GNU-style difference formats. |
 | [`diff3`](diff3/README.md) | Compare three files and report, script, or merge three-way changes. |
 | [`sdiff`](sdiff/README.md) | Display side-by-side differences and optionally perform an interactive merge. |
+| [`diffutil`](diffutil/README.md) | Route `cmp`, `diff`, `diff3`, or `sdiff` through one installable .NET tool command. |
 
 Each executable directory contains a dedicated man-page-style `README.md`
 describing its implemented command-line profile, exit statuses, platform
@@ -92,6 +93,32 @@ including selection and editing of differing regions.
 
 See each command's own README for its exact implemented option set.
 
+## Distribution
+
+### .NET tool
+
+`diffutil` is the single installable command-line tool package for the suite.
+Build the package with:
+
+```text
+dotnet pack diffutil/Icod.DiffUtils.DiffUtil.csproj -c Release -o artifacts
+```
+
+The resulting `Icod.DiffUtils` package installs `diffutil`, which dispatches to
+the four managed command implementations in-process.
+
+### Traditional executables
+
+`cmp`, `diff`, `diff3`, and `sdiff` remain independent executable projects and
+are intentionally not NuGet-packable. They can be published and collected into
+a conventional ZIP distribution. `diffutil` may be included in the same ZIP if
+both invocation styles are desired.
+
+The traditional ZIP is assembled separately for now; there is no aggregate
+multi-command .NET tool package and no automated ZIP packaging target.
+
+See [`packaging/README.md`](packaging/README.md) for distribution verification.
+
 ## Building
 
 The repository requires a .NET 10 SDK.
@@ -139,6 +166,8 @@ Icod.DiffUtils/
 ├── diff/                     two-way file and directory comparison
 ├── diff3/                    three-way comparison and merge
 ├── sdiff/                    side-by-side comparison and interactive merge
+├── diffutil/                 multi-command .NET tool router
+├── packaging/                distribution documentation and verification
 ├── tests/                    command and shared-library tests
 ├── Icod.DiffUtils.sln
 ├── build.cmd
@@ -147,8 +176,8 @@ Icod.DiffUtils/
 
 ## Documentation
 
-Every executable has a dedicated `README.md` intended to function much like a
-manual page.
+Every executable, including `diffutil`, has a dedicated `README.md` intended to
+function much like a manual page.
 
 For the reusable comparison and merge architecture, see
 [`Icod.DiffUtils.Shared/README.md`](Icod.DiffUtils.Shared/README.md).

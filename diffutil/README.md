@@ -65,42 +65,30 @@ The router itself returns 0 for its own `--help` and `--version` operations and
 
 ## DISTRIBUTION MODES
 
-The repository supports three complementary distribution forms.
+The repository supports two complementary distribution forms.
 
 ### Conventional .NET tool
 
-The `Icod.DiffUtils` NuGet tool package installs one command:
+The `Icod.DiffUtils` NuGet tool package installs exactly one command:
 
 ```text
 diffutil
 ```
 
-This is the preferred managed-tool interface when command names should remain
-under one package-owned namespace.
+This is the supported managed-tool interface. The package does not install
+separate `cmp`, `diff`, `diff3`, or `sdiff` shims; those commands are selected
+through the router's first argument.
 
-### Multi-command .NET tool package
+### Traditional executables
 
-The custom `Icod.DiffUtils.Executables` tool package installs five command
-shims from one package:
+The `cmp`, `diff`, `diff3`, and `sdiff` projects remain standalone executable
+projects for conventional binary distributions. A traditional ZIP can be
+assembled from their published outputs and may include `diffutil` as well.
 
-```text
-diffutil
-cmp
-diff
-diff3
-sdiff
-```
+The ZIP is assembled separately for now; the repository does not currently
+produce an aggregate executable archive automatically.
 
-This mode is intended for environments that want the traditional executable
-names directly on the .NET tool path.
-
-### Executable archive
-
-The packaging project can publish a RID-specific archive containing framework-
-dependent apphosts for all five commands. This form is suitable for unpacking
-into an ordinary binary directory without using `dotnet tool install`.
-
-See `packaging/README.md` in the repository for pack and archive commands.
+See `packaging/README.md` for the supported packaging and verification workflow.
 
 ## IMPLEMENTATION NOTES
 
