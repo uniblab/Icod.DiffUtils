@@ -64,7 +64,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            platform: Windows
+            architecture: x64
+          - os: windows-11-arm
+            platform: Windows
+            architecture: ARM64
+          - os: ubuntu-24.04
+            platform: Linux
+            architecture: x64
+          - os: ubuntu-24.04-arm
+            platform: Linux
+            architecture: ARM64
+          - os: macos-15-intel
+            platform: macOS
+            architecture: x64
+          - os: macos-15
+            platform: macOS
+            architecture: ARM64
+    name: ${{ matrix.platform }} ${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -83,10 +102,17 @@ jobs:
         include:
           - os: windows-latest
             rid: win-x64
-          - os: ubuntu-latest
+          - os: windows-11-arm
+            rid: win-arm64
+          - os: ubuntu-24.04
             rid: linux-x64
+          - os: ubuntu-24.04-arm
+            rid: linux-arm64
           - os: macos-15-intel
             rid: osx-x64
+          - os: macos-15
+            rid: osx-arm64
+    name: ${{ matrix.rid }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -230,8 +256,8 @@ jobs:
                   Where-Object { $_.Extension -in @('.zip', '.nupkg') } |
                   Sort-Object Name
           )
-          if (4 -ne $files.Count) {
-              throw "Expected four release binaries before checksumming; found $($files.Count)."
+          if (7 -ne $files.Count) {
+              throw "Expected seven release binaries before checksumming; found $($files.Count)."
           }
 
           $lines = foreach ($file in $files) {
@@ -261,9 +287,9 @@ jobs:
           dotnet tool install --global Icod.DiffUtils --version {0}
           ```
 
-          Traditional executable ZIPs are attached for Windows x64, Linux x64,
-          and macOS x64. They contain `cmp`, `diff`, `diff3`, `sdiff`, and
-          `diffutil`, and require the .NET 10 runtime.
+          Traditional executable ZIPs are attached for Windows, Linux, and macOS
+          on both x64 and ARM64. They contain `cmp`, `diff`, `diff3`, `sdiff`,
+          and `diffutil`, and require the .NET 10 runtime.
           '@ -f $version
 
           $assets = @(
@@ -272,8 +298,8 @@ jobs:
                   Sort-Object Name |
                   ForEach-Object { $_.FullName }
           )
-          if (5 -ne $assets.Count) {
-              throw "Expected five GitHub Release assets; found $($assets.Count)."
+          if (8 -ne $assets.Count) {
+              throw "Expected eight GitHub Release assets; found $($assets.Count)."
           }
 
           $arguments = @(
