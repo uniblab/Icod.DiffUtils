@@ -89,7 +89,7 @@ Run 'diffutil COMMAND --help' for command-specific help.
 		}
 
 		var assemblyVersion = assembly.GetName().Version;
-		if ( null is assemblyVersion ) {
+		if ( assemblyVersion is null ) {
 			return "unknown";
 		}
 		return assemblyVersion.ToString( 3 );
