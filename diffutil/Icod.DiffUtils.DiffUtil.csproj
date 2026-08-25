@@ -28,7 +28,7 @@
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReleaseNotes>Initial mixed-mode diffutil tool distribution.</PackageReleaseNotes>
-		<PackageTags>diff;diffutils;cmp;diff3;sdiff;gnu;cli;tool;icod;command-line;diff-utils</PackageTags>
+		<PackageTags>diff;diffutils;cmp;diff3;sdiff;gnu;cli;tool;icod;command-line;diff-utils;diffutil;file-comparison;gnu-diffutils;gnu-utils;posix;text-comparison;comparison;unified-diff</PackageTags>
 		<PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(PlatformTarget)' == '' ">
