@@ -10,8 +10,8 @@
 		<OutputPath>..\bin\$(Configuration)\</OutputPath>
 		<AssemblyName>diffutil</AssemblyName>
 		<RootNamespace>Icod.DiffUtils.DiffUtil</RootNamespace>
-		<Version>1.0.0</Version>
-		<PackageVersion>1.0.0</PackageVersion>
+		<Version>1.0.1</Version>
+		<PackageVersion>1.0.1</PackageVersion>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>diffutil</ToolCommandName>
 		<PackageId>Icod.DiffUtils</PackageId>
