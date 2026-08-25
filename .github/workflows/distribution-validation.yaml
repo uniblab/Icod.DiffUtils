@@ -4,9 +4,12 @@ on:
   pull_request:
   push:
     branches:
-      - main
-      - distro
+      - '**'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
