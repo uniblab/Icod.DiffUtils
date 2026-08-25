@@ -126,13 +126,28 @@ Prerelease versions containing a hyphen are created as GitHub prereleases.
 
 ### Repository configuration
 
-Create an Actions repository secret named `NUGET_API_KEY` containing a NuGet.org
-API key authorized to publish `Icod.DiffUtils`. GitHub Packages and GitHub
-Release creation use the workflow-provided `GITHUB_TOKEN`; no separate GitHub
-package token is stored in the repository.
+NuGet.org publication uses Trusted Publishing rather than a stored long-lived API
+key. In the NuGet.org account that owns `Icod.DiffUtils`, create a GitHub Actions
+Trusted Publishing policy with these values:
 
-The workflow grants `packages: write` only to the GitHub Packages publication
-job and `contents: write` only to the GitHub Release job.
+```text
+Repository owner: uniblab
+Repository:       Icod.DiffUtils
+Workflow file:    release.yaml
+Environment:      (leave empty)
+```
+
+Create an Actions repository secret named `NUGET_USER` containing the NuGet.org
+profile name that owns or is authorized to publish `Icod.DiffUtils`. Use the
+profile name, not an email address. The workflow grants `id-token: write` only to
+the NuGet.org publication job and uses `NuGet/login@v1` to exchange GitHub's OIDC
+token for a short-lived NuGet credential immediately before publication. No
+long-lived NuGet API key is stored in GitHub.
+
+GitHub Packages and GitHub Release creation use the workflow-provided
+`GITHUB_TOKEN`; no separate GitHub package token is stored in the repository. The
+workflow grants `packages: write` only to the GitHub Packages publication job and
+`contents: write` only to the GitHub Release job.
 
 ### Publishing a version
 
@@ -149,10 +164,10 @@ git push origin v1.0.0
 
 The tag is the release trigger and the immutable source identity for every
 package and archive produced by that workflow. Package registries are immutable
-for a published version, so use a new version for a new release. If a late job
-fails after an earlier publication job succeeded, prefer GitHub Actions'
-"Re-run failed jobs" operation rather than starting a completely new release
-workflow run.
+for a published version, so use a new version for a new release. Both registry
+pushes use `--skip-duplicate`, which makes publication jobs safe to rerun after a
+later stage fails. Prefer GitHub Actions' "Re-run failed jobs" operation when
+recovering a partially completed release.
 
 ## Versioning
 

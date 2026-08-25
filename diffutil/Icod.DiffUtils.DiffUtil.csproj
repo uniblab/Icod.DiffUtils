@@ -18,6 +18,9 @@
 		<Authors>Timothy J. Bruce</Authors>
 		<Description>Managed GNU Diffutils 3.12 command router for cmp, diff, diff3, and sdiff.</Description>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageProjectUrl>https://github.com/uniblab/Icod.DiffUtils</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/uniblab/Icod.DiffUtils</RepositoryUrl>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReleaseNotes>Initial mixed-mode diffutil tool distribution.</PackageReleaseNotes>
