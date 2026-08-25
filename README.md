@@ -114,10 +114,19 @@ are intentionally not NuGet-packable. They can be published and collected into
 a conventional ZIP distribution. `diffutil` may be included in the same ZIP if
 both invocation styles are desired.
 
-The traditional ZIP is assembled separately for now; there is no aggregate
-multi-command .NET tool package and no automated ZIP packaging target.
+Tagged releases automatically publish framework-dependent single-file archives
+for `win-x64`, `linux-x64`, and `osx-x64`. Each ZIP contains all five executable
+entry points plus the repository `LICENSE` and `README.md`, and requires a .NET
+10 runtime. There is no aggregate multi-command .NET tool package.
 
-See [`packaging/README.md`](packaging/README.md) for distribution verification.
+A `v<version>` tag on a commit contained in `main` starts the release workflow.
+The workflow verifies that the tag matches the `diffutil` package version, runs
+the three-platform distribution checks, builds the ZIPs, publishes the
+`Icod.DiffUtils` package to NuGet.org and GitHub Packages, writes SHA-256
+checksums, and creates the GitHub Release with all release assets.
+
+See [`packaging/README.md`](packaging/README.md) for distribution verification
+and release instructions.
 
 ## Building
 
@@ -155,7 +164,9 @@ Pull requests are restored, built, and tested with .NET 10 on:
 
 Pushes to `main` are built and tested in the repository's `Release`
 configuration on the same three operating systems. Release builds treat compiler
-warnings as errors except for documentation warning `CS1591`.
+warnings as errors except for documentation warning `CS1591`. Version tags of
+the form `v<version>` run the separate publication workflow after validating the
+tagged commit and package metadata.
 
 ## Project layout
 
@@ -167,7 +178,7 @@ Icod.DiffUtils/
 ├── diff3/                    three-way comparison and merge
 ├── sdiff/                    side-by-side comparison and interactive merge
 ├── diffutil/                 multi-command .NET tool router
-├── packaging/                distribution documentation and verification
+├── packaging/                distribution verification and release tooling
 ├── tests/                    command and shared-library tests
 ├── Icod.DiffUtils.sln
 ├── build.cmd

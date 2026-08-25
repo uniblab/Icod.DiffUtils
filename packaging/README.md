@@ -1,13 +1,14 @@
 # Icod.DiffUtils distribution
 
-This directory contains distribution verification for `Icod.DiffUtils`. Command
-behavior remains in the `cmp`, `diff`, `diff3`, `sdiff`, and `diffutil` projects.
+This directory contains distribution verification and release tooling for
+`Icod.DiffUtils`. Command behavior remains in the `cmp`, `diff`, `diff3`,
+`sdiff`, and `diffutil` projects.
 
 The supported distribution model intentionally has two forms:
 
 1. one installable .NET tool package exposing `diffutil`; and
-2. the traditional standalone executables, which can be assembled into a ZIP
-   distribution separately.
+2. traditional ZIP archives containing the five standalone executable entry
+   points for a specific runtime identifier.
 
 ## .NET tool package
 
@@ -17,19 +18,8 @@ The SDK tool package is produced directly from the router project:
 dotnet pack diffutil/Icod.DiffUtils.DiffUtil.csproj -c Release -o artifacts
 ```
 
-The resulting package ID is:
-
-```text
-Icod.DiffUtils
-```
-
-It installs exactly one tool command:
-
-```text
-diffutil
-```
-
-Use it as:
+The resulting package ID is `Icod.DiffUtils`. It installs exactly one tool
+command, `diffutil`, which is used as:
 
 ```text
 diffutil cmp [args...]
@@ -43,27 +33,41 @@ The .NET tool package does not install separate `cmp`, `diff`, `diff3`, or
 so the earlier experimental aggregate `Icod.DiffUtils.Executables` package has
 been removed.
 
-## Traditional executable distribution
+## Traditional executable archives
 
-The four historical command projects remain ordinary executable projects:
+The four historical command projects remain ordinary executable projects and
+are deliberately marked `IsPackable=false`. `diffutil` is added as the fifth
+entry point in traditional release archives.
+
+`BuildReleaseArchive.ps1` publishes framework-dependent single-file apphosts and
+creates a ZIP containing:
 
 ```text
-cmp/Icod.DiffUtils.Cmp.csproj
-diff/Icod.DiffUtils.Diff.csproj
-diff3/Icod.DiffUtils.Diff3.csproj
-sdiff/Icod.DiffUtils.SDiff.csproj
+cmp
+diff
+diff3
+sdiff
+diffutil
+LICENSE
+README.md
 ```
 
-They are deliberately marked `IsPackable=false`: they are executable artifacts,
-not separate NuGet packages.
+Windows archives use the normal `.exe` suffix. The published ZIPs require a
+compatible .NET 10 runtime.
 
-For a traditional ZIP release, publish or collect the executable outputs for the
-desired runtime and assemble the archive manually. `diffutil` may be included in
-that ZIP as a fifth executable so users of the archive can choose either the
-traditional command names or the multi-command router.
+To build an archive locally with PowerShell 7:
 
-No repository target currently creates the ZIP automatically. This is
-intentional for the present release model.
+```text
+pwsh packaging/BuildReleaseArchive.ps1 -RuntimeIdentifier win-x64 -Version 1.0.0
+pwsh packaging/BuildReleaseArchive.ps1 -RuntimeIdentifier linux-x64 -Version 1.0.0
+pwsh packaging/BuildReleaseArchive.ps1 -RuntimeIdentifier osx-x64 -Version 1.0.0
+```
+
+The script smoke-tests the five apphosts when the requested RID matches the
+current host. On Unix-like hosts it uses the system `zip` command so executable
+permissions are retained in the archive. A `-SelfContained` switch is available
+for local experimentation, but the automated GitHub releases are intentionally
+framework-dependent.
 
 ## Distribution verification
 
@@ -90,8 +94,65 @@ The verifier:
 - installs the package from an isolated local NuGet source; and
 - exercises `diffutil --version` and each routed command's `--version` path.
 
-The same verification is run by the repository's distribution-validation GitHub
-Actions workflow on Windows, Linux, and macOS.
+The same verification is run by GitHub Actions on Windows, Linux, and macOS.
+
+## Automated releases
+
+`.github/workflows/release.yaml` is triggered only by pushed tags beginning with
+`v`. Before publishing anything, it requires all of the following:
+
+- the tag has the form `v<semver>`;
+- the tagged commit is contained in `main`;
+- the tag version matches both `Version` and `PackageVersion` in
+  `diffutil/Icod.DiffUtils.DiffUtil.csproj`;
+- distribution verification passes on Windows, Ubuntu, and macOS;
+- the `win-x64`, `linux-x64`, and `osx-x64` ZIPs build and smoke-test; and
+- the `Icod.DiffUtils` NuGet package is built successfully.
+
+Only after those gates pass does the workflow publish the same `.nupkg` first to
+NuGet.org and then to GitHub Packages. If both publications succeed, it creates
+a GitHub Release for the existing tag and attaches:
+
+```text
+Icod.DiffUtils-<version>-win-x64.zip
+Icod.DiffUtils-<version>-linux-x64.zip
+Icod.DiffUtils-<version>-osx-x64.zip
+Icod.DiffUtils.<version>.nupkg
+SHA256SUMS.txt
+```
+
+GitHub also supplies its normal source-code archives for the tagged commit.
+Prerelease versions containing a hyphen are created as GitHub prereleases.
+
+### Repository configuration
+
+Create an Actions repository secret named `NUGET_API_KEY` containing a NuGet.org
+API key authorized to publish `Icod.DiffUtils`. GitHub Packages and GitHub
+Release creation use the workflow-provided `GITHUB_TOKEN`; no separate GitHub
+package token is stored in the repository.
+
+The workflow grants `packages: write` only to the GitHub Packages publication
+job and `contents: write` only to the GitHub Release job.
+
+### Publishing a version
+
+First update `Version` and `PackageVersion` together in the `diffutil` project,
+merge that change to `main`, and ensure normal CI is green. Then tag that exact
+commit and push the tag:
+
+```text
+git switch main
+git pull
+git tag -a v1.0.0 -m "Icod.DiffUtils 1.0.0"
+git push origin v1.0.0
+```
+
+The tag is the release trigger and the immutable source identity for every
+package and archive produced by that workflow. Package registries are immutable
+for a published version, so use a new version for a new release. If a late job
+fails after an earlier publication job succeeded, prefer GitHub Actions'
+"Re-run failed jobs" operation rather than starting a completely new release
+workflow run.
 
 ## Versioning
 
@@ -105,6 +166,6 @@ Update both values together when preparing a release.
 
 ## Licensing
 
-`diffutil` and the standalone executable commands are GPL-3.0-or-later. The
-`diffutil` project carries the same GPLv3 license used by the traditional
-executable projects.
+`diffutil` and the standalone executable commands are GPL-3.0-or-later. Every
+traditional ZIP contains the repository GPLv3 `LICENSE`, and the corresponding
+source is the tagged repository revision used to build the GitHub Release.

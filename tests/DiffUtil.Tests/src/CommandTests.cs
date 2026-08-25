@@ -1,6 +1,7 @@
 namespace Icod.DiffUtils.DiffUtil.Tests;
 
 using System.Globalization;
+using System.Reflection;
 using Icod.CommandFramework.Diagnostics;
 using Icod.DiffUtils.DiffUtil;
 using Xunit;
@@ -32,6 +33,29 @@ public sealed class CommandTests {
 		var result = await RunAsync( commandName, "--version" );
 		Assert.Equal( 0, result.ExitCode );
 		Assert.Contains( expectedText, result.Stdout, StringComparison.Ordinal );
+		Assert.Equal( string.Empty, result.Stderr );
+	}
+
+	/// <summary>Verifies the router version follows assembly package metadata.</summary>
+	[Fact]
+	public async Task VersionUsesAssemblyInformationalVersion() {
+		var result = await RunAsync( "--version" );
+		Assert.Equal( 0, result.ExitCode );
+
+		var informationalVersion = typeof( Command ).Assembly
+			.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+			?.InformationalVersion;
+		Assert.False( string.IsNullOrWhiteSpace( informationalVersion ) );
+		var expectedVersion = informationalVersion!;
+		var metadataSeparator = expectedVersion.IndexOf( '+' );
+		if ( 0 <= metadataSeparator ) {
+			expectedVersion = expectedVersion[ ..metadataSeparator ];
+		}
+
+		Assert.Equal(
+			$"diffutil (Icod.DiffUtils) {expectedVersion}{Environment.NewLine}",
+			result.Stdout
+		);
 		Assert.Equal( string.Empty, result.Stderr );
 	}
 

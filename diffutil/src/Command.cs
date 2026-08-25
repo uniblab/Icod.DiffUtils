@@ -1,5 +1,6 @@
 namespace Icod.DiffUtils.DiffUtil;
 
+using System.Reflection;
 using Icod.CommandFramework.Diagnostics;
 using CmpCommand = Icod.DiffUtils.Cmp.Command;
 using DiffCommand = Icod.DiffUtils.Diff.Command;
@@ -8,7 +9,7 @@ using SDiffCommand = Icod.DiffUtils.SDiff.Command;
 
 /// <summary>Routes <c>diffutil COMMAND [args...]</c> to the managed Diffutils commands.</summary>
 public static class Command {
-	private const string VersionText = "diffutil (Icod.DiffUtils) 1.0.0";
+	private static readonly string VersionText = $"diffutil (Icod.DiffUtils) {GetVersionText()}";
 	private const string HelpText = """
 Usage:
  diffutil COMMAND [OPTION]... [ARG]...
@@ -72,6 +73,26 @@ Run 'diffutil COMMAND --help' for command-specific help.
 			"sdiff" => await SDiffCommand.RunAsync( commandArguments, childContext ).ConfigureAwait( false ),
 			_ => throw new InvalidOperationException( "Known command dispatch was incomplete." )
 		};
+	}
+
+	private static string GetVersionText() {
+		var assembly = typeof( Command ).Assembly;
+		var informationalVersion = assembly
+			.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+			?.InformationalVersion;
+		if ( !string.IsNullOrWhiteSpace( informationalVersion ) ) {
+			var metadataSeparator = informationalVersion.IndexOf( '+' );
+			if ( 0 <= metadataSeparator ) {
+				return informationalVersion[ ..metadataSeparator ];
+			}
+			return informationalVersion;
+		}
+
+		var assemblyVersion = assembly.GetName().Version;
+		if ( null is assemblyVersion ) {
+			return "unknown";
+		}
+		return assemblyVersion.ToString( 3 );
 	}
 
 	private static bool IsKnownCommand( string commandName ) {

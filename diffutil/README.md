@@ -85,10 +85,13 @@ The `cmp`, `diff`, `diff3`, and `sdiff` projects remain standalone executable
 projects for conventional binary distributions. A traditional ZIP can be
 assembled from their published outputs and may include `diffutil` as well.
 
-The ZIP is assembled separately for now; the repository does not currently
-produce an aggregate executable archive automatically.
+Version-tagged GitHub releases automatically produce framework-dependent
+single-file ZIPs for `win-x64`, `linux-x64`, and `osx-x64`. Each archive includes
+`cmp`, `diff`, `diff3`, `sdiff`, and `diffutil` together with the repository
+license and README, and requires the .NET 10 runtime.
 
-See `packaging/README.md` for the supported packaging and verification workflow.
+See `packaging/README.md` for the supported packaging, verification, and release
+workflow.
 
 ## IMPLEMENTATION NOTES
 
