@@ -174,6 +174,7 @@ try {
             '-c', $Configuration,
             '-r', $RuntimeIdentifier,
             '--self-contained', $selfContainedValue,
+            "-p:PublishSelfContained=$selfContainedValue",
             '-p:PublishSingleFile=true',
             '-p:PublishTrimmed=false',
             '-p:DebugType=None',

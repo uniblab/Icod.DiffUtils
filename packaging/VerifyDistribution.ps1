@@ -20,9 +20,9 @@ function Get-ProjectProperty {
     )
 
     foreach ($group in $Project.Project.PropertyGroup) {
-        $value = $group.$Name
-        if ($null -ne $value -and 0 -lt "$value".Length) {
-            return "$value"
+        $property = $group.SelectSingleNode($Name)
+        if ($null -ne $property -and 0 -lt $property.InnerText.Length) {
+            return $property.InnerText
         }
     }
 

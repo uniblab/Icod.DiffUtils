@@ -10,9 +10,11 @@
 		<OutputPath>..\bin\$(Configuration)\</OutputPath>
 		<AssemblyName>diffutil</AssemblyName>
 		<RootNamespace>Icod.DiffUtils.DiffUtil</RootNamespace>
-		<Version>1.0.1</Version>
-		<AssemblyVersion>1.0.1.0</AssemblyVersion>
-		<PackageVersion>1.0.1</PackageVersion>
+		<Version>1.0.2</Version>
+		<AssemblyVersion>1.0.2.0</AssemblyVersion>
+	</PropertyGroup>
+	<PropertyGroup>
+		<PackageVersion>1.0.2</PackageVersion>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>diffutil</ToolCommandName>
 		<PackageId>Icod.DiffUtils</PackageId>
@@ -22,10 +24,12 @@
 		<PackageProjectUrl>https://github.com/uniblab/Icod.DiffUtils</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/uniblab/Icod.DiffUtils</RepositoryUrl>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReleaseNotes>Initial mixed-mode diffutil tool distribution.</PackageReleaseNotes>
-		<PackageTags>diff;diffutils;cmp;diff3;sdiff;gnu;cli;tool</PackageTags>
+		<PackageTags>diff;diffutils;cmp;diff3;sdiff;gnu;cli;tool;icod;command-line;diff-utils;diffutil;file-comparison;gnu-diffutils;gnu-utils;posix;text-comparison;comparison;unified-diff</PackageTags>
+		<PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(PlatformTarget)' == '' ">
 		<PlatformTarget>AnyCPU</PlatformTarget>
@@ -67,6 +71,7 @@
 		<WarningsNotAsErrors>CS1591</WarningsNotAsErrors>
 	</PropertyGroup>
 	<ItemGroup>
+		<None Include="icon.png" Pack="true" PackagePath="" />
 		<Content Include="README.md">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>$(AssemblyName).README.md</TargetPath>
