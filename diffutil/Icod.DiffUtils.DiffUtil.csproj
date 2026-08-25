@@ -12,6 +12,7 @@
 		<RootNamespace>Icod.DiffUtils.DiffUtil</RootNamespace>
 		<Version>1.0.1</Version>
 		<AssemblyVersion>1.0.1.0</AssemblyVersion>
+		<PackageVersion>1.0.1</PackageVersion>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>diffutil</ToolCommandName>
 		<PackageId>Icod.DiffUtils</PackageId>
