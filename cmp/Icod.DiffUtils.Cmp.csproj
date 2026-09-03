@@ -11,8 +11,6 @@
 		<OutputPath>..\bin\$(Configuration)\</OutputPath>
 		<AssemblyName>cmp</AssemblyName>
 		<RootNamespace>Icod.DiffUtils.Cmp</RootNamespace>
-		<Version>1.0.1</Version>
-		<AssemblyVersion>1.0.1.0</AssemblyVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(PlatformTarget)' == '' ">
 		<PlatformTarget>AnyCPU</PlatformTarget>

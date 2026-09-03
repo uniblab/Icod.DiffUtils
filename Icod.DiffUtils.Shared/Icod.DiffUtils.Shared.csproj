@@ -10,8 +10,6 @@
 		<OutputPath>..\bin\$(Configuration)\</OutputPath>
 		<AssemblyName>Icod.DiffUtils.Shared</AssemblyName>
 		<RootNamespace>Icod.DiffUtils.Shared</RootNamespace>
-		<Version>1.0.1</Version>
-		<AssemblyVersion>1.0.1.0</AssemblyVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(PlatformTarget)' == '' ">
 		<PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,7 +47,6 @@
 		<WarningsNotAsErrors>CS1591</WarningsNotAsErrors>
 	</PropertyGroup>
 	<PropertyGroup>
-		<PackageVersion>1.0.0</PackageVersion>
 		<PackageReleaseNotes>Initial release of Icod.DiffUtils.Shared</PackageReleaseNotes>
 		<Authors>Timothy J. Bruce</Authors>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
