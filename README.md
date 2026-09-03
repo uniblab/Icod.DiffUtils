@@ -1,6 +1,6 @@
 # Icod.DiffUtils
 
-![Icod TUI Toolchain](https://raw.githubusercontent.com/uniblab/Icod.DiffUtils/v1.0.3/Icod.DiffUtils.banner.png)
+![Icod TUI Toolchain](https://raw.githubusercontent.com/uniblab/Icod.DiffUtils/main/Icod.DiffUtils.banner.png)
 
 [![PR Staging build](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml/badge.svg)](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml)
 [![Main Release validation](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/main.yaml)
@@ -100,35 +100,50 @@ See each command's own README for its exact implemented option set.
 
 ## Distribution
 
-### .NET tool
+### NuGet packages
 
-`diffutil` is the single installable command-line tool package for the suite.
-Build the package with:
+The repository produces two NuGet packages at the repository version:
+
+- `Icod.DiffUtils` — the installable .NET tool package containing `diffutil`;
+- `Icod.DiffUtils.Shared` — the reusable shared comparison library.
+
+Build all packable projects with:
 
 ```text
-dotnet pack diffutil/Icod.DiffUtils.DiffUtil.csproj -c Release -o artifacts
+dotnet pack Icod.DiffUtils.sln -c Release -o artifacts
 ```
 
-The resulting `Icod.DiffUtils` package installs `diffutil`, which dispatches to
-the four managed command implementations in-process.
+The `Icod.DiffUtils` tool package installs one command, `diffutil`, which
+dispatches to the four managed command implementations in-process.
 
 ### Traditional executables
 
 `cmp`, `diff`, `diff3`, and `sdiff` remain independent executable projects and
-are intentionally not NuGet-packable. They can be published and collected into
-a conventional ZIP distribution. `diffutil` may be included in the same ZIP if
-both invocation styles are desired.
+are intentionally not NuGet-packable. Tagged releases publish framework-
+dependent single-file archives containing all five executable entry points
+(`cmp`, `diff`, `diff3`, `sdiff`, and `diffutil`) plus the repository `LICENSE`
+and `README.md`.
 
-Tagged releases automatically publish framework-dependent single-file archives
-for `win-x64`, `linux-x64`, and `osx-x64`. Each ZIP contains all five executable
-entry points plus the repository `LICENSE` and `README.md`, and requires a .NET
-10 runtime. There is no aggregate multi-command .NET tool package.
+Automated release archives are built for:
 
-A `v<version>` tag on a commit contained in `main` starts the release workflow.
-The workflow verifies that the tag matches the `diffutil` package version, runs
-the three-platform distribution checks, builds the ZIPs, publishes the
-`Icod.DiffUtils` package to NuGet.org and GitHub Packages, writes SHA-256
-checksums, and creates the GitHub Release with all release assets.
+```text
+win-x64
+win-arm64
+linux-x64
+linux-arm64
+osx-x64
+osx-arm64
+```
+
+The archives require a .NET 10 runtime.
+
+A `v<semver>` tag on a commit contained in `main` starts the Release publication
+workflow. The tag version must match the package version derived from
+`Directory.Build.props`. The workflow validates the tag and default-branch
+containment, builds matching NuGet packages, creates all six RID archives,
+publishes packages to NuGet.org and GitHub Packages, writes SHA-256 checksums,
+and creates the GitHub Release only after all applicable publication and archive
+jobs succeed.
 
 See [`packaging/README.md`](packaging/README.md) for distribution verification
 and release instructions.
@@ -149,6 +164,12 @@ On Unix-like hosts:
 ./build.sh
 ```
 
+Both wrappers use the `Debug` configuration and run the canonical local sequence:
+
+```text
+clean → restore → build → test → pack → validate
+```
+
 Or build the solution directly:
 
 ```text
@@ -159,19 +180,41 @@ dotnet test Icod.DiffUtils.sln -c Debug --no-build --no-restore
 
 The solution defines `Debug`, `Staging`, and `Release` configurations.
 
+## Versioning
+
+Repository versioning is centralized in the root
+[`Directory.Build.props`](Directory.Build.props). `VersionPrefix` is the single
+authoritative release-version literal; `Version`, `PackageVersion`,
+`AssemblyVersion`, and `FileVersion` are derived from it for all production
+projects.
+
+For the `1.0.3` development branch, the centralized version is `1.0.3`.
+
 ## Continuous integration
 
-Pull requests are restored, built, and tested with .NET 10 on:
+Pull requests use the `Staging` configuration on:
 
-- `windows-latest`
-- `ubuntu-latest`
-- `macos-latest`
+- `windows-latest`;
+- `ubuntu-latest`;
+- `macos-latest`.
 
-Pushes to `main` are built and tested in the repository's `Release`
-configuration on the same three operating systems. Release builds treat compiler
-warnings as errors except for documentation warning `CS1591`. Version tags of
-the form `v<version>` run the separate publication workflow after validating the
-tagged commit and package metadata.
+All three restore, build, and test the solution. The Linux job also packs and
+performs exact NuGet artifact validation.
+
+Pushes to `main` use the `Release` configuration and run authoritative
+distribution validation across six hosted runners:
+
+- Windows x64;
+- Windows ARM64;
+- Linux x64;
+- Linux ARM64;
+- macOS x64;
+- macOS ARM64.
+
+Release builds treat compiler warnings as errors except for documentation warning
+`CS1591`. The separate `release.yaml` workflow is triggered only by supported
+`v<semver>` tags contained in the default branch and performs package/archive
+publication under the `Release` configuration.
 
 ## Project layout
 
@@ -185,6 +228,7 @@ Icod.DiffUtils/
 ├── diffutil/                 multi-command .NET tool router
 ├── packaging/                distribution verification and release tooling
 ├── tests/                    command and shared-library tests
+├── Directory.Build.props     centralized repository version
 ├── Icod.DiffUtils.sln
 ├── build.cmd
 └── build.sh
