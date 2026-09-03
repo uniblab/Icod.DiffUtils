@@ -1,5 +1,10 @@
 # Icod.DiffUtils
 
+![Icod TUI Toolchain](https://raw.githubusercontent.com/uniblab/Icod.DiffUtils/v1.0.3/Icod.DiffUtils.banner.png)
+
+[![PR Staging build](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml/badge.svg)](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml)
+[![Main Release validation](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/main.yaml)
+
 `Icod.DiffUtils` is a managed .NET implementation of GNU Diffutils 3.12,
 providing the familiar `cmp`, `diff`, `diff3`, and `sdiff` command-line tools in
 C#, together with the `diffutil` multi-command .NET tool router.
