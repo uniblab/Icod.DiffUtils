@@ -1,8 +1,8 @@
 # Icod.DiffUtils
 
-![Icod TUI Toolchain](https://raw.githubusercontent.com/uniblab/Icod.DiffUtils/main/Icod.DiffUtils.banner.png)
+![Icod.DiffUtils](https://raw.githubusercontent.com/uniblab/Icod.DiffUtils/main/Icod.DiffUtils.banner.png)
 
-[![PR Staging build](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml/badge.svg)](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml)
+[![PR Staging build](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml/badge.svg?event=pull_request)](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/pull-request.yaml)
 [![Main Release validation](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/uniblab/Icod.DiffUtils/actions/workflows/main.yaml)
 
 `Icod.DiffUtils` is a managed .NET implementation of GNU Diffutils 3.12,
@@ -188,7 +188,12 @@ authoritative release-version literal; `Version`, `PackageVersion`,
 `AssemblyVersion`, and `FileVersion` are derived from it for all production
 projects.
 
-For the `1.0.3` development branch, the centralized version is `1.0.3`.
+Version `1.0.3` does not intentionally change command behavior or user-visible
+functionality. The version bump primarily records documentation, licensing, and
+repository metadata corrections: the source and project files now carry explicit
+GPL/LGPL notices, the build/release documentation reflects the normalized CI/CD
+workflow, and repository version metadata is centralized for consistent package
+and executable releases.
 
 ## Continuous integration
 
