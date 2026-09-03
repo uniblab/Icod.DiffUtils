@@ -79,16 +79,26 @@ This is the supported managed-tool interface. The package does not install
 separate `cmp`, `diff`, `diff3`, or `sdiff` shims; those commands are selected
 through the router's first argument.
 
+The package version is inherited from the repository-wide version declared in
+`Directory.Build.props`.
+
 ### Traditional executables
 
 The `cmp`, `diff`, `diff3`, and `sdiff` projects remain standalone executable
-projects for conventional binary distributions. A traditional ZIP can be
-assembled from their published outputs and may include `diffutil` as well.
+projects for conventional binary distributions. Tagged GitHub releases also
+include `diffutil`, producing framework-dependent single-file ZIPs for:
 
-Version-tagged GitHub releases automatically produce framework-dependent
-single-file ZIPs for `win-x64`, `linux-x64`, and `osx-x64`. Each archive includes
-`cmp`, `diff`, `diff3`, `sdiff`, and `diffutil` together with the repository
-license and README, and requires the .NET 10 runtime.
+```text
+win-x64
+win-arm64
+linux-x64
+linux-arm64
+osx-x64
+osx-arm64
+```
+
+Each archive contains `cmp`, `diff`, `diff3`, `sdiff`, and `diffutil` together
+with the repository `LICENSE` and `README.md`, and requires the .NET 10 runtime.
 
 See `packaging/README.md` for the supported packaging, verification, and release
 workflow.
@@ -101,7 +111,9 @@ name is the traditional command name (`cmp`, `diff`, `diff3`, or `sdiff`), so
 command diagnostics remain compatible rather than being rewritten as
 `diffutil` diagnostics.
 
-The implementation targets .NET 10 and C# 13.
+The implementation targets .NET 10 and C# 13. Repository version metadata is
+centralized in the root `Directory.Build.props` and shared with the standalone
+commands and `Icod.DiffUtils.Shared`.
 
 ## LICENSE
 

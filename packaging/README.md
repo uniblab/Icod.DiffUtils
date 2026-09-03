@@ -65,7 +65,9 @@ Validates already-produced `.nupkg` files, including nuspec identity/version met
 
 ### `SelectReleasePackages.ps1`
 
-Filters all packages produced by solution-level packing and selects only packages whose nuspec version equals the `v<semver>` release tag. This is important here because `Icod.DiffUtils` and `Icod.DiffUtils.Shared` are independently versioned packages.
+Filters all packages produced by solution-level packing and selects only packages whose nuspec version equals the `v<semver>` release tag. In this repository, `Icod.DiffUtils` and `Icod.DiffUtils.Shared` inherit the same centralized repository version, so a normal tagged release selects both packages together.
+
+The version filter remains useful as a defensive release gate: a package whose generated nuspec version does not equal the tag is never published accidentally.
 
 ### `BuildReleaseArchive.ps1`
 
@@ -98,7 +100,7 @@ publish-github-packages ──────┼── github-release
 archives ─────────────────────┘
 ```
 
-NuGet.org and GitHub Packages publish in parallel from the same validated package artifact. GitHub Release creation requires all applicable registry and archive jobs to succeed.
+NuGet.org and GitHub Packages publish in parallel from the same validated package artifact set. GitHub Release creation requires all applicable registry and archive jobs to succeed.
 
 ## Release prerequisites
 
@@ -112,6 +114,18 @@ GitHub Packages and GitHub Release use `GITHUB_TOKEN` with job-scoped permission
 
 ## Version contract
 
+Repository versioning is centralized in the root `Directory.Build.props`.
+`VersionPrefix` is the only release-version literal. The common build imports derive:
+
+```text
+Version
+PackageVersion
+AssemblyVersion
+FileVersion
+```
+
+from that value for all production projects, including both NuGet packages.
+
 A release tag must match:
 
 ```text
@@ -119,4 +133,4 @@ vMAJOR.MINOR.PATCH
 vMAJOR.MINOR.PATCH-prerelease
 ```
 
-Only NuGet packages whose actual nuspec version equals the tag version are selected for publication. Independently versioned packages that do not match the tag are validated but are not published by that release.
+For a normal release, the tag version must match the centralized repository version. Only NuGet packages whose actual generated nuspec version equals the tag version are selected for publication.
