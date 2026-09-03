@@ -32,7 +32,7 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Icod.CommandFramework" Version="1.1.0" />
+		<PackageReference Include="Icod.CommandFramework" Version="2.1.0" />
 		<ProjectReference Include="..\cmp\Icod.DiffUtils.Cmp.csproj" />
 		<ProjectReference Include="..\diff\Icod.DiffUtils.Diff.csproj" />
 		<ProjectReference Include="..\diff3\Icod.DiffUtils.Diff3.csproj" />
