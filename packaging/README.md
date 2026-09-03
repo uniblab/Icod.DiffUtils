@@ -1,186 +1,122 @@
-# Icod.DiffUtils distribution
+# C#/.NET build and packaging workflow
 
-This directory contains distribution verification and release tooling for
-`Icod.DiffUtils`. Command behavior remains in the `cmp`, `diff`, `diff3`,
-`sdiff`, and `diffutil` projects.
+This directory is the shared implementation behind the repository's local build scripts and GitHub Actions workflows.
 
-The supported distribution model intentionally has two forms:
+The design follows the canonical `uniblab/.github` repository pattern. It assumes:
 
-1. one installable .NET tool package exposing `diffutil`; and
-2. traditional ZIP archives containing the five standalone executable entry
-   points for a specific runtime identifier.
+- one root `.sln` or `.slnx` file;
+- one or more C# projects (`.csproj`) in that solution;
+- .NET 10 as the SDK/runtime generation;
+- NuGet for package publication; and
+- optional executable projects distributed as RID-specific ZIP archives.
 
-## .NET tool package
+Repository and package names are not inferred from the GitHub repository name. Build inputs are discovered from the repository, while package identity/version metadata is read from generated NuGet packages or MSBuild.
 
-The SDK tool package is produced directly from the router project:
+## Validation ladder
 
-```text
-dotnet pack diffutil/Icod.DiffUtils.DiffUtil.csproj -c Release -o artifacts
-```
+| Lifecycle | Configuration | Work |
+| --- | --- | --- |
+| local `build.cmd` / `build.sh` | `Debug` | clean, restore, build, test, pack, exact package validation |
+| pull request | `Staging` | Windows/Linux/macOS build and test; Linux also validates generated NuGet artifacts |
+| default branch | `Release` | six-runner Windows/Linux/macOS x64/ARM64 distribution validation |
+| `v<semver>` tag | `Release` | package/archive production and publication |
 
-The resulting package ID is `Icod.DiffUtils`. It installs exactly one tool
-command, `diffutil`, which is used as:
+## Scripts
 
-```text
-diffutil cmp [args...]
-diffutil diff [args...]
-diffutil diff3 [args...]
-diffutil sdiff [args...]
-```
+### `RepositoryTools.psm1`
 
-The .NET tool package does not install separate `cmp`, `diff`, `diff3`, or
-`sdiff` shims. Current `dotnet tool` packaging supports one command per package,
-so the earlier experimental aggregate `Icod.DiffUtils.Executables` package has
-been removed.
+Shared helpers locate the root solution, enumerate its projects, read MSBuild properties, discover executable projects from `OutputType`, and read package identity/version/readme metadata from `.nupkg` files.
 
-## Traditional executable archives
+### `Get-RepositoryMetadata.ps1`
 
-The four historical command projects remain ordinary executable projects and
-are deliberately marked `IsPackable=false`. `diffutil` is added as the fifth
-entry point in traditional release archives.
-
-`BuildReleaseArchive.ps1` publishes framework-dependent single-file apphosts and
-creates a ZIP containing:
+Returns repository-level metadata and can write these GitHub Actions outputs:
 
 ```text
-cmp
-diff
-diff3
-sdiff
-diffutil
-LICENSE
-README.md
+has_solution
+solution_path
+has_executables
 ```
 
-Windows archives use the normal `.exe` suffix. The published ZIPs require a
-compatible .NET 10 runtime.
+The exported solution path is repository-relative so metadata can move safely between Windows, Linux, and macOS jobs.
 
-To build an archive locally with PowerShell 7:
+### `Invoke-Build.ps1`
+
+Implements the local build contract used by both wrappers. The default invocation performs:
 
 ```text
-pwsh packaging/BuildReleaseArchive.ps1 -RuntimeIdentifier win-x64 -Version 1.0.0
-pwsh packaging/BuildReleaseArchive.ps1 -RuntimeIdentifier linux-x64 -Version 1.0.0
-pwsh packaging/BuildReleaseArchive.ps1 -RuntimeIdentifier osx-x64 -Version 1.0.0
+clean → restore → build → test → pack → validate
 ```
 
-The script smoke-tests the five apphosts when the requested RID matches the
-current host. On Unix-like hosts it uses the system `zip` command so executable
-permissions are retained in the archive. A `-SelfContained` switch is available
-for local experimentation, but the automated GitHub releases are intentionally
-framework-dependent.
+with the `Debug` configuration. Individual stages can also be requested.
 
-## Distribution verification
+### `VerifyDistribution.ps1`
 
-Run:
+Performs authoritative source-tree validation:
+
+1. restore;
+2. build;
+3. test;
+4. pack without rebuilding; and
+5. verify the exact generated NuGet artifacts.
+
+### `VerifyPackageArtifact.ps1`
+
+Validates already-produced `.nupkg` files, including nuspec identity/version metadata, declared readme presence, and .NET tool metadata shape where applicable.
+
+### `SelectReleasePackages.ps1`
+
+Filters all packages produced by solution-level packing and selects only packages whose nuspec version equals the `v<semver>` release tag. This is important here because `Icod.DiffUtils` and `Icod.DiffUtils.Shared` are independently versioned packages.
+
+### `BuildReleaseArchive.ps1`
+
+Discovers every `Exe`/`WinExe` project through MSBuild and creates a framework-dependent single-file ZIP for a requested RID. For this repository that means the command executables are discovered from the solution rather than hard-coded into the workflow.
+
+Default automated release RIDs are:
 
 ```text
-powershell packaging/VerifyDistribution.ps1
+win-x64
+win-arm64
+linux-x64
+linux-arm64
+osx-x64
+osx-arm64
 ```
 
-or, with PowerShell 7:
+## Tagged release graph
+
+After tag/default-branch validation, package and executable archive production run independently:
 
 ```text
-pwsh packaging/VerifyDistribution.ps1
+metadata
+  ├── package
+  │     ├── publish-nuget
+  │     └── publish-github-packages
+  └── archives (6 RIDs)
+
+publish-nuget ────────────────┐
+publish-github-packages ──────┼── github-release
+archives ─────────────────────┘
 ```
 
-The verifier:
+NuGet.org and GitHub Packages publish in parallel from the same validated package artifact. GitHub Release creation requires all applicable registry and archive jobs to succeed.
 
-- restores, builds, and tests the solution;
-- executes the built standalone `cmp`, `diff`, `diff3`, and `sdiff` apphosts;
-- packs `Icod.DiffUtils` from the `diffutil` project;
-- inspects the generated tool package and requires exactly one command named
-  `diffutil`;
-- verifies that the managed command assemblies are present in the package;
-- installs the package from an isolated local NuGet source; and
-- exercises `diffutil --version` and each routed command's `--version` path.
+## Release prerequisites
 
-The same verification is run by GitHub Actions on Windows, Linux, and macOS.
+NuGet.org publication requires:
 
-## Automated releases
+- a GitHub environment named `Release`;
+- an Actions secret named `NUGET_USER`; and
+- a NuGet.org Trusted Publishing policy for `release.yaml` and environment `Release`.
 
-`.github/workflows/release.yaml` is triggered only by pushed tags beginning with
-`v`. Before publishing anything, it requires all of the following:
+GitHub Packages and GitHub Release use `GITHUB_TOKEN` with job-scoped permissions.
 
-- the tag has the form `v<semver>`;
-- the tagged commit is contained in `main`;
-- the tag version matches both `Version` and `PackageVersion` in
-  `diffutil/Icod.DiffUtils.DiffUtil.csproj`;
-- distribution verification passes on Windows, Ubuntu, and macOS;
-- the `win-x64`, `linux-x64`, and `osx-x64` ZIPs build and smoke-test; and
-- the `Icod.DiffUtils` NuGet package is built successfully.
+## Version contract
 
-Only after those gates pass does the workflow publish the same `.nupkg` first to
-NuGet.org and then to GitHub Packages. If both publications succeed, it creates
-a GitHub Release for the existing tag and attaches:
+A release tag must match:
 
 ```text
-Icod.DiffUtils-<version>-win-x64.zip
-Icod.DiffUtils-<version>-linux-x64.zip
-Icod.DiffUtils-<version>-osx-x64.zip
-Icod.DiffUtils.<version>.nupkg
-SHA256SUMS.txt
+vMAJOR.MINOR.PATCH
+vMAJOR.MINOR.PATCH-prerelease
 ```
 
-GitHub also supplies its normal source-code archives for the tagged commit.
-Prerelease versions containing a hyphen are created as GitHub prereleases.
-
-### Repository configuration
-
-NuGet.org publication uses Trusted Publishing rather than a stored long-lived API
-key. In the NuGet.org account that owns `Icod.DiffUtils`, create a GitHub Actions
-Trusted Publishing policy with these values:
-
-```text
-Repository owner: uniblab
-Repository:       Icod.DiffUtils
-Workflow file:    release.yaml
-Environment:      (leave empty)
-```
-
-Create an Actions repository secret named `NUGET_USER` containing the NuGet.org
-profile name that owns or is authorized to publish `Icod.DiffUtils`. Use the
-profile name, not an email address. The workflow grants `id-token: write` only to
-the NuGet.org publication job and uses `NuGet/login@v1` to exchange GitHub's OIDC
-token for a short-lived NuGet credential immediately before publication. No
-long-lived NuGet API key is stored in GitHub.
-
-GitHub Packages and GitHub Release creation use the workflow-provided
-`GITHUB_TOKEN`; no separate GitHub package token is stored in the repository. The
-workflow grants `packages: write` only to the GitHub Packages publication job and
-`contents: write` only to the GitHub Release job.
-
-### Publishing a version
-
-First update `Version` and `PackageVersion` together in the `diffutil` project,
-merge that change to `main`, and ensure normal CI is green. Then tag that exact
-commit and push the tag:
-
-```text
-git switch main
-git pull
-git tag -a v1.0.0 -m "Icod.DiffUtils 1.0.0"
-git push origin v1.0.0
-```
-
-The tag is the release trigger and the immutable source identity for every
-package and archive produced by that workflow. Package registries are immutable
-for a published version, so use a new version for a new release. Both registry
-pushes use `--skip-duplicate`, which makes publication jobs safe to rerun after a
-later stage fails. Prefer GitHub Actions' "Re-run failed jobs" operation when
-recovering a partially completed release.
-
-## Versioning
-
-The installable tool version is controlled by `Version` and `PackageVersion` in:
-
-```text
-diffutil/Icod.DiffUtils.DiffUtil.csproj
-```
-
-Update both values together when preparing a release.
-
-## Licensing
-
-`diffutil` and the standalone executable commands are GPL-3.0-or-later. Every
-traditional ZIP contains the repository GPLv3 `LICENSE`, and the corresponding
-source is the tagged repository revision used to build the GitHub Release.
+Only NuGet packages whose actual nuspec version equals the tag version are selected for publication. Independently versioned packages that do not match the tag are validated but are not published by that release.
