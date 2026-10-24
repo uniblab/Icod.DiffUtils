@@ -19,9 +19,11 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+extern alias Expressions;
+
 namespace Icod.DiffUtils.SDiff;
 
-using Icod.CommandFramework.RegularExpressions;
+using Expressions::Icod.CommandFramework.RegularExpressions;
 using Icod.DiffUtils.Shared.Lines;
 
 /// <summary>Contains validated <c>sdiff</c> options and comparison policies.</summary>

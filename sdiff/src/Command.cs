@@ -22,13 +22,15 @@
 // Original behavior/reference: GNU diffutils sdiff 3.12
 // Ported to .NET by Timothy J. Bruce <uniblab@hotmail.com>
 
+extern alias Expressions;
+
 namespace Icod.DiffUtils.SDiff;
 
 using System.Security;
 using Icod.CommandFramework.CommandLine;
 using Icod.CommandFramework.Diagnostics;
 using Icod.CommandFramework.IO;
-using Icod.CommandFramework.RegularExpressions;
+using Expressions::Icod.CommandFramework.RegularExpressions;
 using Icod.DiffUtils.Shared;
 using Icod.DiffUtils.Shared.Edits;
 using Icod.DiffUtils.Shared.Lines;

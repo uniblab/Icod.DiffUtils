@@ -19,11 +19,13 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+extern alias Expressions;
+
 namespace Icod.DiffUtils.Diff;
 
 using System.Globalization;
 using System.Text;
-using Icod.CommandFramework.RegularExpressions;
+using Expressions::Icod.CommandFramework.RegularExpressions;
 using Icod.DiffUtils.Shared.Edits;
 using Icod.DiffUtils.Shared.Layout;
 using Icod.DiffUtils.Shared.Lines;
