@@ -30,6 +30,14 @@ using Xunit;
 public sealed class CommandTests {
 	private static readonly string Nl = Environment.NewLine;
 
+	/// <summary>The ignored-line expression contract comes from the published Expressions assembly.</summary>
+	[Fact]
+	public void IgnoredLinePatternUsesExpressionsAssembly() {
+		var options = typeof( Command ).Assembly.GetType( "Icod.DiffUtils.SDiff.SDiffOptions", throwOnError: true )!;
+		var patternList = options.GetProperty( "IgnoredLinePatterns" )!.PropertyType;
+		Assert.Equal( "Icod.Expressions", patternList.GenericTypeArguments[0].Assembly.GetName().Name );
+	}
+
 	/// <summary>Ordinary output aligns common and changed rows and returns status one.</summary>
 	[Fact]
 	public async Task SideBySideOutputReportsDifferences() {
