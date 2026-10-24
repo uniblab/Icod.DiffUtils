@@ -56,6 +56,9 @@ behavior remain in the individual command projects.
 General-purpose command-line, filesystem, stream, text, locale, process, and
 platform mechanics come from the published `Icod.CommandFramework` package
 rather than being duplicated in this repository.
+The `diff` and `sdiff` GNU basic regular-expression matching comes from
+`Icod.Expressions`; their other command and platform services still use
+`Icod.CommandFramework`.
 
 ## Compatibility philosophy
 

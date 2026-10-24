@@ -29,6 +29,14 @@ using Xunit;
 public sealed class CommandTests {
 	private static readonly string Nl = Environment.NewLine;
 
+	/// <summary>The function-line expression contract comes from the published Expressions assembly.</summary>
+	[Fact]
+	public void FunctionPatternUsesExpressionsAssembly() {
+		var options = typeof( Command ).Assembly.GetType( "Icod.DiffUtils.Diff.DiffOptions", throwOnError: true )!;
+		var expression = options.GetProperty( "FunctionExpression" )!.PropertyType;
+		Assert.Equal( "Icod.Expressions", expression.Assembly.GetName().Name );
+	}
+
 	/// <summary>Traditional output reports a changed line and status one.</summary>
 	[Fact]
 	public async Task NormalFormatReportsChangedLine() {
